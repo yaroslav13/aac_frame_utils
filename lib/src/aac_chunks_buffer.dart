@@ -17,9 +17,11 @@ final class AacChunksBuffer {
     while (bufferIndex <= _buffer.length - 7) {
       final headerIndex =
           _findNextAdtsHeaderIndex(_buffer.sublist(bufferIndex));
+
       if (headerIndex == -1) {
         break;
       }
+
       final absoluteHeaderIndex = bufferIndex + headerIndex;
 
       if (_buffer.length < absoluteHeaderIndex + 7) {
@@ -35,6 +37,7 @@ final class AacChunksBuffer {
             absoluteHeaderIndex + frameLength,
           ),
         );
+
         extractedFrames.add(frame);
         bufferIndex = absoluteHeaderIndex + frameLength;
       } else {
