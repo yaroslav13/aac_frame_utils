@@ -1,0 +1,10 @@
+name: aac_frame_utils
+description: A package for efficiently buffering AAC audio data and extracting complete ADTS frames.
+version: 1.0.0
+repository: https://github.com/yaroslav13/aac_frame_utils.git
+
+environment:
+  sdk: ^3.6.0
+
+dev_dependencies:
+  test: ^1.24.0
