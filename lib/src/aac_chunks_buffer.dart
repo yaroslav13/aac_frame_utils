@@ -14,28 +14,29 @@ final class AacChunksBuffer {
     _buffer.addAll(chunk);
 
     final frames = <int>[];
+    var currentIndex = 0;
 
-    while (_buffer.length >= _adtsHeaderLength) {
-      // Check for ADTS syncword (0xFFF)
-      if (!(_buffer[0] == 0xFF && (_buffer[1] & 0xF0) == 0xF0)) {
-        // Not a valid header; discard until next possible header
-        _buffer.removeAt(0);
+    while (_buffer.length - currentIndex >= _adtsHeaderLength) {
+      if (_buffer[currentIndex] != 0xFF ||
+          (_buffer[currentIndex + 1] & 0xF0) != 0xF0) {
+        currentIndex++;
         continue;
       }
 
-      // Extract frame length (13 bits) from ADTS header
-      final frameLength = ((_buffer[3] & 0x03) << 11) |
-          (_buffer[4] << 3) |
-          ((_buffer[5] & 0xE0) >> 5);
+      final frameLength = ((_buffer[currentIndex + 3] & 0x03) << 11) |
+          (_buffer[currentIndex + 4] << 3) |
+          ((_buffer[currentIndex + 5] & 0xE0) >> 5);
 
-      if (_buffer.length < frameLength) {
-        // Wait for more data
-        break;
-      }
+      if (_buffer.length - currentIndex < frameLength) break;
 
-      // Extract full frame and add to output
-      frames.addAll(_buffer.sublist(0, frameLength));
-      _buffer.removeRange(0, frameLength);
+      frames.addAll(
+        _buffer.sublist(currentIndex, currentIndex + frameLength),
+      );
+      currentIndex += frameLength;
+    }
+
+    if (currentIndex > 0) {
+      _buffer.removeRange(0, currentIndex);
     }
 
     return Uint8List.fromList(frames);
